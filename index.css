@@ -1,0 +1,44 @@
+body {
+    background-size: cover;
+    background-image: url(https://freedesignfile.com/upload/2017/04/The-sun-between-the-mountains-Stock-Photo.jpg);
+}
+
+nav {
+    border: 5px solid white;
+    border-radius: 15px;
+    margin: 10px;
+    text-align: center;
+}
+
+nav a {
+    border: 5px solid white;
+    margin: 5px;
+    border-radius: 10px;
+    font-size: 30px;
+}
+
+nav a:hover {
+    border: 1px solid red;
+    font-weight: bold;
+    text-shadow: 5px 5px 5px yellow;
+}
+
+#userid {
+    margin-left: 1200px;
+}
+
+#userid a {
+    border-radius: 50%;
+    padding: 10px 20px 10px 20px;
+    background-color: purple;
+    color: white;
+}
+
+.rowplay img {
+    box-shadow: 1px 1px 1px 25px rgba(241, 176, 12, 0.475);
+}
+
+.rowplay img:hover {
+    box-shadow: 20px 20px 20px rgb(241, 176, 12);
+    margin-top: 120px !important;
+}
