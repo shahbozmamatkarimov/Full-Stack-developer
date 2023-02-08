@@ -1,0 +1,28 @@
+{
+  "name": "telegram",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^4.1.0",
+    "@vitalets/google-translate-api": "^9.1.0",
+    "axios": "^1.2.3",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.3",
+    "google-translate": "^3.0.0",
+    "google-translate-api": "^2.3.0",
+    "google-translate-api-browser": "^3.0.0",
+    "http-proxy-agent": "^5.0.0",
+    "https": "^1.0.0",
+    "node-telegram-bot-api": "^0.61.0",
+    "nodemon": "^2.0.20",
+    "telegram-keyboard": "^2.3.2"
+  }
+}
