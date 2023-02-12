@@ -2,7 +2,7 @@ const { read_file, write_file } = require("./fs/fs_api");
 const bcrypt = require('bcryptjs');
 const TelegramApi = require("node-telegram-bot-api");
 require('dotenv').config()
-let hashPsw, salt, admin1 = false
+let hashPsw, salt, admin1 = false, m = [5, 30, 30], l
 const api = process.env.TOKEN;
 const ADMIN = process.env.ADMIN
 const bot = new TelegramApi(api, { polling: true })
@@ -16,16 +16,16 @@ const remove_options = {
 bot.setMyCommands([
     { command: "/start", description: "Boshlash" },
     { command: "/info", description: "Ma'lumotlar" },
-    { command: "/clear", description: "Botni tozalash" }
 ])
 
 const options = {
     reply_markup: JSON.stringify({
         keyboard: [
             [{ text: "userlar ro'yhati" }, { text: "user qo'shish" }],
-            [{ text: "userni o'chirish" }, { text: "ball kiritish" }]
+            [{ text: "userni o'chirish" }, { text: "ball kiritish" }],
         ]
-    })
+    }),
+    parse_mode: 'HTML'
 };
 
 let start = read_file("start.json")[0];
@@ -47,10 +47,22 @@ bot.on("message", async msg => {
     if (parol.length == 2 && parol[0] == "parol:" && parol[1] == ADMIN) {
         salt = await bcrypt.genSalt(10)
         hashPsw = await bcrypt.hash(`${chatId}`, salt)
+        admin1 = true
         if (admin.length == 0) {
             write_file("admin.json", [hashPsw])
         }
-        admin1 = true
+        else {
+            let bool = true;
+            for (let i of admin) {
+                if (await bcrypt.compare(`${chatId}`, i)) {
+                    bool = false;
+                }
+            }
+            if (bool) {
+                admin.push(hashPsw)
+                write_file("admin.json", admin)
+            }
+        }
     }
 
 
@@ -62,48 +74,80 @@ bot.on("message", async msg => {
         bot.sendMessage(chatId, `Assalomu alaykum ${user} ${lastname} botga xush kelibsiz!!!\n/info bot haqida\n/ball ball haqida ma'lumot\n/clear botni tozalash`, remove_options)
     }
 
-    if (await bcrypt.compare(`${chatId}`, `${admin[0]}`) || admin1) {
-        try {
-            if (start != text) {
+    for (let i of admin) {
+        if (await bcrypt.compare(`${chatId}`, i)) {
+            admin1 = true
+        }
+    }
 
+    if (admin1) {
+        try {
+            if (start == "userlar ro'yhati" && text == "userlar ro'yhati") {
+                bot.sendMessage(chatId, "Ro'yhatda hech qanday o'zgarish bo'lmasa,\n<b><i>userlar ro'yhati</i></b>     tugmasi ishga tushmaydi.\nBuning uchun /userlist ni bosing", { parse_mode: 'HTML' })
+            }
+
+            if (start != text) {
                 if (text == `parol: ${ADMIN}`.toLowerCase()) {
-                    console.log('psw');
                     const user = msg.from.first_name
                     const lastname = msg.from.last_name
                     bot.sendMessage(chatId, `Assalomu alaykum ${user} ${lastname} admin panelga xush kelibsiz!!! `, options)
-
-                    write_file("start.json", [text])
                 }
 
                 else if (text == "/info") {
-                    bot.sendMessage(chatId, "Bu bot sizga sizni balingizni chiqarib beradi!", options)
-                }
-
-                else if (text == "/clear") {
-                    console.log(msg.message_id);
-                    for (let i = 0; i <= 50; i++) {
-                        bot.deleteMessage(chatId, msg.message_id - i, remove_options)
-                    }
-                }
-
-                else if (text == "/button") {
-                    bot.sendMessage(chatId, "buttons", options)
+                    bot.sendMessage(chatId, "Bu bot orqali siz userlarni qo'shishingiz, o'chirishingiz va ball kiritishingiz mumkin. Shuningdek userlar ro'yhatini ham ko'rishingiz mumkin. Buning uchun pastdagi buttonlarni bosing va komandalarni kiriting!!!", options)
                 }
 
                 else if (text == "userlar ro'yhati") {
-                    let content = '';
-
+                    let content = "", s = "";
+                    let info = ['id', 'ism', 'familiya', 'ball']
+                    for (let i in info) {
+                        s += info[i]
+                        l = String(info[i]).length
+                        for (let j = 0; j < m[i] - l; j++) {
+                            s += " "
+                        }
+                    }
                     users.forEach((user, index) => {
+                        content += `<pre><i>${s}</i></pre>`;
+                        s = ""
+                        for (let i in user) {
+                            s += user[i]
+                            l = String(user[i]).length
+                            for (let j = 0; j < m[i] - l; j++) {
+                                s += " "
+                            }
+                        }
                         user[0] = index + 1;
-                    });
-
-                    users.forEach(user => {
-                        content += user.join(",    ") + '\n';
+                        return
                     })
-
+                    bot.sendMessage(chatId, content, options)
                     write_file("users.json", users)
                     write_file("start.json", [text])
-                    bot.sendMessage(chatId, content)
+                }
+
+                else if (text == "/userlist") {
+                    let content = "", s = "";
+                    let info = ['id', 'ism', 'familiya', 'ball']
+                    for (let i in info) {
+                        s += info[i]
+                        l = String(info[i]).length
+                        for (let j = 0; j < m[i] - l; j++) {
+                            s += " "
+                        }
+                    }
+                    users.forEach((user) => {
+                        content += `<pre><i>${s}</i></pre>`;
+                        s = ""
+                        for (let i in user) {
+                            s += user[i]
+                            l = String(user[i]).length
+                            for (let j = 0; j < m[i] - l; j++) {
+                                s += " "
+                            }
+                        }
+                        return
+                    })
+                    bot.sendMessage(chatId, content, options)
                 }
 
                 else if (text == "user qo'shish") {
@@ -148,9 +192,7 @@ bot.on("message", async msg => {
                     else if (message[0] == "ball:" && message.length == 3) {
                         let bool = true;
                         users.find(user => {
-                            console.log(user[0]);
                             if (user[0] == message[1]) {
-                                console.log(user[0], message[1]);
                                 bool = false;
                                 bot.sendMessage(chatId, "Ball kiritildi!", options);
                                 user[3] = message[2];
@@ -172,25 +214,23 @@ bot.on("message", async msg => {
                 }
             }
         } catch (error) {
-            console.log((error.message));
         }
     } else {
         try {
             if (text == "/ball") {
                 bot.sendMessage(chatId, "Id ism va familiyangizni quyidagicha kiriting:\nId Ism Familiya\n1 Alisher Alisherov", remove_options)
             }
+
+            else if (text == "/reload") {
+                bot.sendMessage(chatId, "loaded", remove_options)
+            }
+
             else {
                 let bool = true;
                 let userinfo = text.split(" ")
 
                 if (text == "/info") {
                     bot.sendMessage(chatId, "Bu bot sizga ballingiz haqida ma'lumot beradi!\nBuning uchun botga /ball ni yuboring", remove_options)
-                }
-
-                else if (text == "/clear") {
-                    for (let i = 0; i < 51; i++) {
-                        bot.deleteMessage(chatId, msg.message_id - i, remove_options)
-                    }
                 }
 
                 else if (userinfo.length == 3) {
@@ -210,7 +250,6 @@ bot.on("message", async msg => {
                 }
             }
         } catch (error) {
-            console.log(error.message);
         }
     }
 })
