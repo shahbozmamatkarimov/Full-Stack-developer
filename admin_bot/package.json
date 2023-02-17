@@ -1,0 +1,23 @@
+{
+  "name": "admin_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "admin.js",
+  "scripts": {
+    "dev": "node admin.js",
+    "start": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.3",
+    "fs": "0.0.1-security",
+    "image-search-engine": "^1.2.1",
+    "node-telegram-bot-api": "^0.61.0",
+    "nodemon": "^2.0.20",
+    "request": "^2.88.2",
+    "telegram-keyboard": "^2.3.2"
+  }
+}
